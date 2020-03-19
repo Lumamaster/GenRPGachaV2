@@ -10,9 +10,9 @@ Known issues to fix include lowering the amount of runtime memory required by re
 
 Names for currencies, etc. are currently preset, but can be easily edited through modifying the code.
 
-##Command list
+## Command list
 
-###Developer commands
+### Developer commands
 ping - Pings the bot.
 reload - Reloads the database
 listusers - Lists all users.
@@ -38,7 +38,7 @@ removeunitfrombanner bannerid, unitid - Removes the specified unit from the spec
 setbannerrate bannerid, rate type, rate - Sets the % likelihood of summoning a unit from this rarity.
 clearbannerfocus bannerid - Removes all units from the focus group of this banner.
 
-###User commands
+### User commands
 register - Registers your Discord account onto the bot. Also gives a one time gift of 100 Recall Shards.
 dailybonus - Claims your daily bonus of 20 Recall Shards.
 singleroll (ID) - Does a single summon on the corresponding banner. (costs 10 Recall Shards)
