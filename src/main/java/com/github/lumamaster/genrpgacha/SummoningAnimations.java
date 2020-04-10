@@ -47,14 +47,14 @@ class SummoningAnimations {
     }
     ArrayList<String> getFourStarAnimation() {
         if ((int)(Math.random() * 50) == 0) {
-            return fivefakeout;
+            return fivecucked;
         } else {
             return fourstar;
         }
     }
     ArrayList<String> getFiveStarAnimation(){
         if ((int)(Math.random() * 50) == 0) {
-            return fivecucked;
+            return fivefakeout;
         } else {
             return fivestar;
         }

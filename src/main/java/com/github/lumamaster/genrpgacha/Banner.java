@@ -312,4 +312,20 @@ public class Banner implements Serializable {
         int choice = (int) (Math.random() * focus.size());
         return focus.get(choice);
     }
+
+    Banner dupe(Storage s, String name) {
+        Banner temp = new Banner();
+        temp.setID(s.getnextBannerID());
+        temp.changeName(name);
+        temp.enable = false;
+        temp.fiverate = this.fiverate;
+        temp.fourrate = this.fourrate;
+        temp.threerate = this.threerate;
+        temp.focusrate = this.focusrate;
+        temp.focus = (ArrayList<Integer>)(this.focus.clone());
+        temp.fivestar = (ArrayList<Integer>)(this.fivestar.clone());
+        temp.fourstar = (ArrayList<Integer>)(this.fourstar.clone());
+        temp.threestar = (ArrayList<Integer>)(this.threestar.clone());
+        return temp;
+    }
 }

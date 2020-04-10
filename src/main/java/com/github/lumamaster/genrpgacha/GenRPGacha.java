@@ -134,6 +134,30 @@ public class GenRPGacha {
             }
         });
 
+        commands.put("db", event -> {
+            store.madeCommand();
+            final Member member = event.getMember().orElse(null);
+            if (member != null) {
+                String[] m = parseCommand(event.getMessage().getContent().toString());
+                String senderID = member.getId().asString();
+                if (m.length != 1) {
+                    event.getMessage().getChannel().block().createMessage("Invalid argument amount. Usage: %db").block();
+                } else {
+                    if (!store.hasUser(senderID)) {
+                        event.getMessage().getChannel().block().createMessage("Please register an account with the %register command, <@" + senderID + ">").block();
+                    } else {
+                        if (store.getUser(senderID).DailyReady()) {
+                            store.getUser(senderID).getDailyBonus();
+                            event.getMessage().getChannel().block().createMessage("You have received your daily bonus of 20 Recall Shards!").block();
+                            store.saveData();
+                        } else {
+                            event.getMessage().getChannel().block().createMessage("You've already claimed your daily bonus for today.").block();
+                        }
+                    }
+                }
+            }
+        });
+
         commands.put("singleroll", event -> {
             store.madeCommand();
             final Member member = event.getMember().orElse(null);
@@ -149,65 +173,167 @@ public class GenRPGacha {
                         if (IDregexconfirm(m[1])) {
                             int id = Integer.parseInt(m[1]);
                             if (store.hasBannerID(id)) {
-                                if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
-                                    store.getUser(senderID).madecommand();
-                                    if (store.getUser(senderID).getSummoningCurrency() >= 10) {
-                                        store.getUser(senderID).addSummoningCurrency(-10);
-                                        Integer tempchar = store.getBannerbyID(id).singlepull();
-                                        Character ref = store.getCharacterByID(tempchar);
-                                        String mess = "You have summoned: " + ref.getName() + ".\n";
-                                        Thread summoning = new Thread(() -> {
-                                            ArrayList<String> summontemp;
-                                            if (ref.getRarity() == 3) {
-                                                summontemp = summon.getThreeStarAnimation();
-                                            } else if (ref.getRarity() == 4) {
-                                                summontemp = summon.getFourStarAnimation();
-                                            } else {
-                                                summontemp = summon.getFiveStarAnimation();
-                                            }
-                                            Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
-                                            for (int a1 = 1; a1 < summontemp.size(); a1++) {
+                                if (store.getBannerbyID(id).isEnabled()) {
+                                    if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
+                                        store.getUser(senderID).madecommand();
+                                        if (store.getUser(senderID).getSummoningCurrency() >= 10) {
+                                            store.getUser(senderID).addSummoningCurrency(-10);
+                                            Integer tempchar = store.getBannerbyID(id).singlepull();
+                                            Character ref = store.getCharacterByID(tempchar);
+                                            String mess = "You have summoned: " + ref.getName() + ".\n";
+                                            Thread summoning = new Thread(() -> {
+                                                ArrayList<String> summontemp;
+                                                if (ref.getRarity() == 3) {
+                                                    summontemp = summon.getThreeStarAnimation();
+                                                } else if (ref.getRarity() == 4) {
+                                                    summontemp = summon.getFourStarAnimation();
+                                                } else {
+                                                    summontemp = summon.getFiveStarAnimation();
+                                                }
+                                                Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
+                                                for (int a1 = 1; a1 < summontemp.size(); a1++) {
+                                                    try {
+                                                        Thread.sleep(1000);
+                                                        final int asdf = a1;
+                                                        messagetest.edit(messageEditSpec -> messageEditSpec.setContent(summontemp.get(asdf))).block();
+                                                    } catch (InterruptedException ignored) {
+                                                    }
+                                                }
                                                 try {
-                                                    Thread.sleep(1000);
-                                                    final int asdf = a1;
-                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(summontemp.get(asdf))).block();
+                                                    Thread.sleep(3000);
                                                 } catch (InterruptedException ignored) {
                                                 }
-                                            }
-                                            messagetest.edit(messageEditSpec -> messageEditSpec.setContent(mess)).block();
-                                            try {
-                                                Thread.sleep(3000);
-                                            } catch (InterruptedException ignored) {
-                                            }
-                                            String blah = summontemp.get(summontemp.size() - 1);
-                                            messagetest.edit(messageEditSpec -> messageEditSpec.setContent(blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```")).block();
-                                            String anotherone = blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```";
-                                            if (store.getUser(senderID).hasCharacter(ref.getID())) {
-                                                int quint;
-                                                if (ref.getRarity() == 3) {
-                                                    quint = 1;
-                                                } else if (ref.getRarity() == 4) {
-                                                    quint = 3;
-                                                } else {
-                                                    quint = 5;
+                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(mess)).block();
+                                                try {
+                                                    Thread.sleep(1000);
+                                                } catch (InterruptedException ignored) {
                                                 }
-                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(anotherone + "\n" + "Since you already possess " + ref.getName() + ", you have been given " + quint + " Quintessence Fragments.")).block();
-                                                store.getUser(senderID).addGuaranteedCurrency(quint);
-                                            } else {
-                                                store.getUser(senderID).addCharacter(tempchar);
-                                            }
-                                            //event.getMessage().getChannel().block().createEmbed(embedCreateSpec -> embedCreateSpec.setImage(ref.getImageLink())).block();
-                                            messagetest.edit(messageEditSpec -> messageEditSpec.setEmbed(embedCreateSpec -> embedCreateSpec.setImage(ref.getImageLink()))).block();
-                                            store.saveData();
-                                            return;
-                                        });
-                                        summoning.start();
+                                                String blah = summontemp.get(summontemp.size() - 1);
+                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```")).block();
+                                                String anotherone = blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```";
+                                                if (store.getUser(senderID).hasCharacter(ref.getID())) {
+                                                    int quint;
+                                                    if (ref.getRarity() == 3) {
+                                                        quint = 1;
+                                                    } else if (ref.getRarity() == 4) {
+                                                        quint = 3;
+                                                    } else {
+                                                        quint = 5;
+                                                    }
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(anotherone + "\n" + "Since you already possess " + ref.getName() + ", you have been given " + quint + " Quintessence Fragment(s).")).block();
+                                                    store.getUser(senderID).addGuaranteedCurrency(quint);
+                                                } else {
+                                                    store.getUser(senderID).addCharacter(tempchar);
+                                                }
+                                                //event.getMessage().getChannel().block().createEmbed(embedCreateSpec -> embedCreateSpec.setImage(ref.getImageLink())).block();
+                                                messagetest.edit(messageEditSpec -> messageEditSpec.setEmbed(embedCreateSpec -> embedCreateSpec.setImage(ref.getImageLink()))).block();
+                                                store.saveData();
+                                                return;
+                                            });
+                                            summoning.start();
 
+                                        } else {
+                                            event.getMessage().getChannel().block().createMessage("Insufficient Recall Shards! You have: " + store.getUser(senderID).getSummoningCurrency() + " Recall Shards. Required: 10 Recall Shards").block();
+                                        }
                                     } else {
-                                        event.getMessage().getChannel().block().createMessage("Insufficient Recall Shards! You have: " + store.getUser(senderID).getSummoningCurrency() + " Recall Shards. Required: 10 Recall Shards").block();
+                                        event.getMessage().getChannel().block().createMessage("Slow down! Please wait " + store.getUser(senderID).timetonextCommand() + " seconds before rolling again.").block();
                                     }
                                 } else {
-                                    event.getMessage().getChannel().block().createMessage("Slow down! Please wait " + store.getUser(senderID).timetonextCommand() + " seconds before rolling again.").block();
+                                    event.getMessage().getChannel().block().createMessage("This banner is not active.").block();
+                                }
+                            } else {
+                                event.getMessage().getChannel().block().createMessage("Banner ID does not exist.").block();
+                            }
+                        } else {
+                            event.getMessage().getChannel().block().createMessage("Invalid ID inputted, ensure it is a number.").block();
+                        }
+                    }
+                }
+            }
+        });
+
+        commands.put("sr", event -> {
+            store.madeCommand();
+            final Member member = event.getMember().orElse(null);
+            if (member != null) {
+                String senderID = member.getId().asString();
+                String[] m = parseCommand(event.getMessage().getContent().toString());
+                if (m.length != 2) {
+                    event.getMessage().getChannel().block().createMessage("Invalid argument amount. Usage: %sr (ID)").block();
+                } else {
+                    if (!store.hasUser(member.getId().asString())) {
+                        event.getMessage().getChannel().block().createMessage("Please register an account with the %register command, <@" + senderID + ">").block();
+                    } else {
+                        if (IDregexconfirm(m[1])) {
+                            int id = Integer.parseInt(m[1]);
+                            if (store.hasBannerID(id)) {
+                                if (store.getBannerbyID(id).isEnabled()) {
+                                    if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
+                                        store.getUser(senderID).madecommand();
+                                        if (store.getUser(senderID).getSummoningCurrency() >= 10) {
+                                            store.getUser(senderID).addSummoningCurrency(-10);
+                                            Integer tempchar = store.getBannerbyID(id).singlepull();
+                                            Character ref = store.getCharacterByID(tempchar);
+                                            String mess = "You have summoned: " + ref.getName() + ".\n";
+                                            Thread summoning = new Thread(() -> {
+                                                ArrayList<String> summontemp;
+                                                if (ref.getRarity() == 3) {
+                                                    summontemp = summon.getThreeStarAnimation();
+                                                } else if (ref.getRarity() == 4) {
+                                                    summontemp = summon.getFourStarAnimation();
+                                                } else {
+                                                    summontemp = summon.getFiveStarAnimation();
+                                                }
+                                                Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
+                                                for (int a1 = 1; a1 < summontemp.size(); a1++) {
+                                                    try {
+                                                        Thread.sleep(1000);
+                                                        final int asdf = a1;
+                                                        messagetest.edit(messageEditSpec -> messageEditSpec.setContent(summontemp.get(asdf))).block();
+                                                    } catch (InterruptedException ignored) {
+                                                    }
+                                                }
+                                                try {
+                                                    Thread.sleep(3000);
+                                                } catch (InterruptedException ignored) {
+                                                }
+                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(mess)).block();
+                                                try {
+                                                    Thread.sleep(1000);
+                                                } catch (InterruptedException ignored) {
+                                                }
+                                                String blah = summontemp.get(summontemp.size() - 1);
+                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```")).block();
+                                                String anotherone = blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```";
+                                                if (store.getUser(senderID).hasCharacter(ref.getID())) {
+                                                    int quint;
+                                                    if (ref.getRarity() == 3) {
+                                                        quint = 1;
+                                                    } else if (ref.getRarity() == 4) {
+                                                        quint = 3;
+                                                    } else {
+                                                        quint = 5;
+                                                    }
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(anotherone + "\n" + "Since you already possess " + ref.getName() + ", you have been given " + quint + " Quintessence Fragment(s).")).block();
+                                                    store.getUser(senderID).addGuaranteedCurrency(quint);
+                                                } else {
+                                                    store.getUser(senderID).addCharacter(tempchar);
+                                                }
+                                                //event.getMessage().getChannel().block().createEmbed(embedCreateSpec -> embedCreateSpec.setImage(ref.getImageLink())).block();
+                                                messagetest.edit(messageEditSpec -> messageEditSpec.setEmbed(embedCreateSpec -> embedCreateSpec.setImage(ref.getImageLink()))).block();
+                                                store.saveData();
+                                                return;
+                                            });
+                                            summoning.start();
+
+                                        } else {
+                                            event.getMessage().getChannel().block().createMessage("Insufficient Recall Shards! You have: " + store.getUser(senderID).getSummoningCurrency() + " Recall Shards. Required: 10 Recall Shards").block();
+                                        }
+                                    } else {
+                                        event.getMessage().getChannel().block().createMessage("Slow down! Please wait " + store.getUser(senderID).timetonextCommand() + " seconds before rolling again.").block();
+                                    }
+                                } else {
+                                    event.getMessage().getChannel().block().createMessage("This banner is not active.").block();
                                 }
                             } else {
                                 event.getMessage().getChannel().block().createMessage("Banner ID does not exist.").block();
@@ -235,82 +361,193 @@ public class GenRPGacha {
                         if (IDregexconfirm(m[1])) {
                             int id = Integer.parseInt(m[1]);
                             if (store.hasBannerID(id)) {
-                                if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
-                                    store.getUser(senderID).madecommand();
-                                    if (store.getUser(senderID).getSummoningCurrency() >= 100) {
-                                        store.getUser(senderID).addSummoningCurrency(-100);
-                                        ArrayList<Integer> tempchar = store.getBannerbyID(id).tenpull();
-                                        ArrayList<String> result = new ArrayList<>();
-                                        result.add("You have summoned:");
-                                        int recall = 0;
-                                        for (Integer character : tempchar) {
-                                            Character ref = store.getCharacterByID(character);
-                                            String tempname = "(" + ref.getRarity() + "\\*) " + ref.getName();
-
-                                            if (store.getUser(senderID).hasCharacter(character)) {
-                                                if (ref.getRarity() == 3) {
-                                                    recall += 1;
-                                                } else if (ref.getRarity() == 4) {
-                                                    recall += 3;
-                                                } else {
-                                                    recall += 5;
-                                                }
-                                                tempname += " (DUPLICATE)";
-                                            } else {
-                                                store.getUser(senderID).addCharacter(character);
-                                                tempname += " (NEW)";
-                                            }
-                                            result.add(result.get(result.size() - 1) + "\n" + tempname);
-                                        }
-                                        if (recall > 0) {
-                                            result.add(result.get(result.size() - 1) + "\n" + "You have been given " + recall + " Quintessence Fragments for your duplicate units.");
-                                        }
-                                        store.getUser(senderID).addGuaranteedCurrency(recall);
-                                        Thread summoning = new Thread(() -> {
-                                            int highestrarity = 3;
+                                if (store.getBannerbyID(id).isEnabled()) {
+                                    if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
+                                        store.getUser(senderID).madecommand();
+                                        if (store.getUser(senderID).getSummoningCurrency() >= 100) {
+                                            store.getUser(senderID).addSummoningCurrency(-100);
+                                            ArrayList<Integer> tempchar = store.getBannerbyID(id).tenpull();
+                                            ArrayList<String> result = new ArrayList<>();
+                                            result.add("You have summoned:");
+                                            int recall = 0;
                                             for (Integer character : tempchar) {
-                                                if (store.getCharacterByID(character).getRarity() > highestrarity) {
-                                                    highestrarity = store.getCharacterByID(character).getRarity();
-                                                }
-                                            }
-                                            ArrayList<String> summontemp;
-                                            if (highestrarity == 3) {
-                                                summontemp = summon.getThreeStarAnimation();
-                                            } else if (highestrarity == 4) {
-                                                summontemp = summon.getFourStarAnimation();
-                                            } else {
-                                                summontemp = summon.getFiveStarAnimation();
-                                            }
-                                            Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
-                                            for (int a1 = 1; a1 < summontemp.size(); a1++) {
-                                                try {
-                                                    Thread.sleep(1000);
-                                                } catch (InterruptedException ignored) {
-                                                }
-                                                int asdf = a1;
-                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(summontemp.get(asdf))).block();
-                                            }
+                                                Character ref = store.getCharacterByID(character);
+                                                String tempname = "(" + ref.getRarity() + "\\*) " + ref.getName();
 
-                                            try {
-                                                Thread.sleep(1000);
-                                            } catch (InterruptedException ignored) {
+                                                if (store.getUser(senderID).hasCharacter(character)) {
+                                                    if (ref.getRarity() == 3) {
+                                                        recall += 1;
+                                                    } else if (ref.getRarity() == 4) {
+                                                        recall += 3;
+                                                    } else {
+                                                        recall += 5;
+                                                    }
+                                                    tempname += " (DUPLICATE)";
+                                                } else {
+                                                    store.getUser(senderID).addCharacter(character);
+                                                    tempname += " (NEW)";
+                                                }
+                                                result.add(result.get(result.size() - 1) + "\n" + tempname);
                                             }
-                                            for (int a1 = 0; a1 < result.size(); a1++) {
+                                            if (recall > 0) {
+                                                result.add(result.get(result.size() - 1) + "\n" + "You have been given " + recall + " Quintessence Fragment(s) for your duplicate units.");
+                                            }
+                                            store.getUser(senderID).addGuaranteedCurrency(recall);
+                                            Thread summoning = new Thread(() -> {
+                                                int highestrarity = 3;
+                                                for (Integer character : tempchar) {
+                                                    if (store.getCharacterByID(character).getRarity() > highestrarity) {
+                                                        highestrarity = store.getCharacterByID(character).getRarity();
+                                                    }
+                                                }
+                                                ArrayList<String> summontemp;
+                                                if (highestrarity == 3) {
+                                                    summontemp = summon.getThreeStarAnimation();
+                                                } else if (highestrarity == 4) {
+                                                    summontemp = summon.getFourStarAnimation();
+                                                } else {
+                                                    summontemp = summon.getFiveStarAnimation();
+                                                }
+                                                Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
+                                                for (int a1 = 1; a1 < summontemp.size(); a1++) {
+                                                    try {
+                                                        Thread.sleep(1000);
+                                                    } catch (InterruptedException ignored) {
+                                                    }
+                                                    int asdf = a1;
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(summontemp.get(asdf))).block();
+                                                }
+
                                                 try {
                                                     Thread.sleep(1000);
                                                 } catch (InterruptedException ignored) {
                                                 }
-                                                int asdf = a1;
-                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(result.get(asdf))).block();
-                                            }
-                                        });
-                                        summoning.start();
-                                        store.saveData();
+                                                for (int a1 = 0; a1 < result.size(); a1++) {
+                                                    try {
+                                                        Thread.sleep(1000);
+                                                    } catch (InterruptedException ignored) {
+                                                    }
+                                                    int asdf = a1;
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(result.get(asdf))).block();
+                                                }
+                                            });
+                                            summoning.start();
+                                            store.saveData();
+                                        } else {
+                                            event.getMessage().getChannel().block().createMessage("Insufficient Recall Shards! You have: " + store.getUser(senderID).getSummoningCurrency() + " Recall Shards. Required: 100 Recall Shards").block();
+                                        }
                                     } else {
-                                        event.getMessage().getChannel().block().createMessage("Insufficient Recall Shards! You have: " + store.getUser(senderID).getSummoningCurrency() + " Recall Shards. Required: 100 Recall Shards").block();
+                                        event.getMessage().getChannel().block().createMessage("Slow down! Please wait " + store.getUser(senderID).timetonextCommand() + " seconds before rolling again.").block();
                                     }
                                 } else {
-                                    event.getMessage().getChannel().block().createMessage("Slow down! Please wait " + store.getUser(senderID).timetonextCommand() + " seconds before rolling again.").block();
+                                    event.getMessage().getChannel().block().createMessage("This banner is not active.").block();
+                                }
+                            } else {
+                                event.getMessage().getChannel().block().createMessage("That banner ID does not exist.").block();
+                            }
+                        } else {
+                            event.getMessage().getChannel().block().createMessage("Invalid ID inputted, ensure it is a number.").block();
+                        }
+                    }
+                }
+            }
+        });
+
+        commands.put("tr", event -> {
+            store.madeCommand();
+            final Member member = event.getMember().orElse(null);
+            if (member != null) {
+                String senderID = member.getId().asString();
+                String[] m = parseCommand(event.getMessage().getContent().toString());
+                if (m.length != 2) {
+                    event.getMessage().getChannel().block().createMessage("Invalid argument amount. Usage: %tr (ID)").block();
+                } else {
+                    if (!store.hasUser(member.getId().asString())) {
+                        event.getMessage().getChannel().block().createMessage("Please register an account with the %register command, <@" + senderID + ">").block();
+                    } else {
+                        if (IDregexconfirm(m[1])) {
+                            int id = Integer.parseInt(m[1]);
+                            if (store.hasBannerID(id)) {
+                                if (store.getBannerbyID(id).isEnabled()) {
+                                    if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
+                                        store.getUser(senderID).madecommand();
+                                        if (store.getUser(senderID).getSummoningCurrency() >= 100) {
+                                            store.getUser(senderID).addSummoningCurrency(-100);
+                                            ArrayList<Integer> tempchar = store.getBannerbyID(id).tenpull();
+                                            ArrayList<String> result = new ArrayList<>();
+                                            result.add("You have summoned:");
+                                            int recall = 0;
+                                            for (Integer character : tempchar) {
+                                                Character ref = store.getCharacterByID(character);
+                                                String tempname = "(" + ref.getRarity() + "\\*) " + ref.getName();
+
+                                                if (store.getUser(senderID).hasCharacter(character)) {
+                                                    if (ref.getRarity() == 3) {
+                                                        recall += 1;
+                                                    } else if (ref.getRarity() == 4) {
+                                                        recall += 3;
+                                                    } else {
+                                                        recall += 5;
+                                                    }
+                                                    tempname += " (DUPLICATE)";
+                                                } else {
+                                                    store.getUser(senderID).addCharacter(character);
+                                                    tempname += " (NEW)";
+                                                }
+                                                result.add(result.get(result.size() - 1) + "\n" + tempname);
+                                            }
+                                            if (recall > 0) {
+                                                result.add(result.get(result.size() - 1) + "\n" + "You have been given " + recall + " Quintessence Fragment(s) for your duplicate units.");
+                                            }
+                                            store.getUser(senderID).addGuaranteedCurrency(recall);
+                                            Thread summoning = new Thread(() -> {
+                                                int highestrarity = 3;
+                                                for (Integer character : tempchar) {
+                                                    if (store.getCharacterByID(character).getRarity() > highestrarity) {
+                                                        highestrarity = store.getCharacterByID(character).getRarity();
+                                                    }
+                                                }
+                                                ArrayList<String> summontemp;
+                                                if (highestrarity == 3) {
+                                                    summontemp = summon.getThreeStarAnimation();
+                                                } else if (highestrarity == 4) {
+                                                    summontemp = summon.getFourStarAnimation();
+                                                } else {
+                                                    summontemp = summon.getFiveStarAnimation();
+                                                }
+                                                Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
+                                                for (int a1 = 1; a1 < summontemp.size(); a1++) {
+                                                    try {
+                                                        Thread.sleep(1000);
+                                                    } catch (InterruptedException ignored) {
+                                                    }
+                                                    int asdf = a1;
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(summontemp.get(asdf))).block();
+                                                }
+
+                                                try {
+                                                    Thread.sleep(1000);
+                                                } catch (InterruptedException ignored) {
+                                                }
+                                                for (int a1 = 0; a1 < result.size(); a1++) {
+                                                    try {
+                                                        Thread.sleep(1000);
+                                                    } catch (InterruptedException ignored) {
+                                                    }
+                                                    int asdf = a1;
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(result.get(asdf))).block();
+                                                }
+                                            });
+                                            summoning.start();
+                                            store.saveData();
+                                        } else {
+                                            event.getMessage().getChannel().block().createMessage("Insufficient Recall Shards! You have: " + store.getUser(senderID).getSummoningCurrency() + " Recall Shards. Required: 100 Recall Shards").block();
+                                        }
+                                    } else {
+                                        event.getMessage().getChannel().block().createMessage("Slow down! Please wait " + store.getUser(senderID).timetonextCommand() + " seconds before rolling again.").block();
+                                    }
+                                } else {
+                                    event.getMessage().getChannel().block().createMessage("This banner is not active.").block();
                                 }
                             } else {
                                 event.getMessage().getChannel().block().createMessage("That banner ID does not exist.").block();
@@ -338,62 +575,161 @@ public class GenRPGacha {
                         if (IDregexconfirm(m[1])) {
                             int id = Integer.parseInt(m[1]);
                             if (store.hasBannerID(id)) {
-                                if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
-                                    store.getUser(senderID).madecommand();
-                                    if (store.getUser(senderID).getSummoningCurrency() >= 100) {
-                                        store.getUser(senderID).addSummoningCurrency(-100);
-                                        Integer tempchar = store.getBannerbyID(id).rarepull();
-                                        Character ref = store.getCharacterByID(tempchar);
-                                        String mess = "You have summoned: " + ref.getName() + ".\n";
-                                        Thread summoning = new Thread(() -> {
-                                            ArrayList<String> summontemp;
-                                            if (ref.getRarity() == 4) {
-                                                summontemp = summon.getFourStarAnimation();
-                                            } else {
-                                                summontemp = summon.getFiveStarAnimation();
-                                            }
-                                            Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
-                                            for (int a1 = 1; a1 < summontemp.size(); a1++) {
+                                if (store.getBannerbyID(id).isEnabled()) {
+                                    if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
+                                        store.getUser(senderID).madecommand();
+                                        if (store.getUser(senderID).getSummoningCurrency() >= 100) {
+                                            store.getUser(senderID).addSummoningCurrency(-100);
+                                            Integer tempchar = store.getBannerbyID(id).rarepull();
+                                            Character ref = store.getCharacterByID(tempchar);
+                                            String mess = "You have summoned: " + ref.getName() + ".\n";
+                                            Thread summoning = new Thread(() -> {
+                                                ArrayList<String> summontemp;
+                                                if (ref.getRarity() == 4) {
+                                                    summontemp = summon.getFourStarAnimation();
+                                                } else {
+                                                    summontemp = summon.getFiveStarAnimation();
+                                                }
+                                                Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
+                                                for (int a1 = 1; a1 < summontemp.size(); a1++) {
+                                                    try {
+                                                        Thread.sleep(1000);
+                                                    } catch (InterruptedException ignored) {
+                                                    }
+                                                    final int asdf = a1;
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(summontemp.get(asdf))).block();
+                                                }
+                                                try {
+                                                    Thread.sleep(3000);
+                                                } catch (InterruptedException ignored) {
+                                                }
+                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(mess)).block();
                                                 try {
                                                     Thread.sleep(1000);
                                                 } catch (InterruptedException ignored) {
                                                 }
-                                                final int asdf = a1;
-                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(summontemp.get(asdf))).block();
-                                            }
-                                            messagetest.edit(messageEditSpec -> messageEditSpec.setContent(mess)).block();
-                                            try {
-                                                Thread.sleep(3000);
-                                            } catch (InterruptedException ignored) {
-                                            }
-                                            String blah = summontemp.get(summontemp.size() - 1);
-                                            messagetest.edit(messageEditSpec -> messageEditSpec.setContent(blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```")).block();
-                                            String anotherone = blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```";
-                                            if (store.getUser(senderID).hasCharacter(ref.getID())) {
-                                                int quint;
-                                                if (ref.getRarity() == 3) {
-                                                    quint = 1;
-                                                } else if (ref.getRarity() == 4) {
-                                                    quint = 3;
+                                                String blah = summontemp.get(summontemp.size() - 1);
+                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```")).block();
+                                                String anotherone = blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```";
+                                                if (store.getUser(senderID).hasCharacter(ref.getID())) {
+                                                    int quint;
+                                                    if (ref.getRarity() == 3) {
+                                                        quint = 1;
+                                                    } else if (ref.getRarity() == 4) {
+                                                        quint = 3;
+                                                    } else {
+                                                        quint = 5;
+                                                    }
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(anotherone + "\n" + "Since you already possess " + ref.getName() + ", you have been given " + quint + " Quintessence Fragment(s).")).block();
+                                                    store.getUser(senderID).addGuaranteedCurrency(quint);
                                                 } else {
-                                                    quint = 5;
+                                                    store.getUser(senderID).addCharacter(tempchar);
                                                 }
-                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(anotherone + "\n" + "Since you already possess " + ref.getName() + ", you have been given " + quint + " Quintessence Fragments.")).block();
-                                                store.getUser(senderID).addGuaranteedCurrency(quint);
-                                            } else {
-                                                store.getUser(senderID).addCharacter(tempchar);
-                                            }
-                                            event.getMessage().getChannel().block().createEmbed(embedCreateSpec -> {
-                                                embedCreateSpec.setImage(ref.getImageLink());
-                                            }).block();
-                                            store.saveData();
-                                        });
-                                        summoning.start();
+                                                event.getMessage().getChannel().block().createEmbed(embedCreateSpec -> {
+                                                    embedCreateSpec.setImage(ref.getImageLink());
+                                                }).block();
+                                                store.saveData();
+                                            });
+                                            summoning.start();
+                                        } else {
+                                            event.getMessage().getChannel().block().createMessage("Insufficient Recall Shards! You have: " + store.getUser(senderID).getSummoningCurrency() + " Recall Shards. Required: 100 Recall Shards").block();
+                                        }
                                     } else {
-                                        event.getMessage().getChannel().block().createMessage("Insufficient Recall Shards! You have: " + store.getUser(senderID).getSummoningCurrency() + " Recall Shards. Required: 100 Recall Shards").block();
+                                        event.getMessage().getChannel().block().createMessage("Slow down! Please wait " + store.getUser(senderID).timetonextCommand() + " seconds before rolling again.").block();
                                     }
                                 } else {
-                                    event.getMessage().getChannel().block().createMessage("Slow down! Please wait " + store.getUser(senderID).timetonextCommand() + " seconds before rolling again.").block();
+                                    event.getMessage().getChannel().block().createMessage("This banner is not active.").block();
+                                }
+                            } else {
+                                event.getMessage().getChannel().block().createMessage("Banner ID does not exist.").block();
+                            }
+                        } else {
+                            event.getMessage().getChannel().block().createMessage("Invalid ID inputted, ensure it is a number.").block();
+                        }
+                    }
+                }
+            }
+        });
+
+        commands.put("rr", event -> {
+            store.madeCommand();
+            final Member member = event.getMember().orElse(null);
+            if (member != null) {
+                String senderID = member.getId().asString();
+                String[] m = parseCommand(event.getMessage().getContent().toString());
+                if (m.length != 2) {
+                    event.getMessage().getChannel().block().createMessage("Invalid argument amount. Usage: %rr (ID)").block();
+                } else {
+                    if (!store.hasUser(member.getId().asString())) {
+                        event.getMessage().getChannel().block().createMessage("Please register an account with the %register command, <@" + senderID + ">").block();
+                    } else {
+                        if (IDregexconfirm(m[1])) {
+                            int id = Integer.parseInt(m[1]);
+                            if (store.hasBannerID(id)) {
+                                if (store.getBannerbyID(id).isEnabled()) {
+                                    if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
+                                        store.getUser(senderID).madecommand();
+                                        if (store.getUser(senderID).getSummoningCurrency() >= 100) {
+                                            store.getUser(senderID).addSummoningCurrency(-100);
+                                            Integer tempchar = store.getBannerbyID(id).rarepull();
+                                            Character ref = store.getCharacterByID(tempchar);
+                                            String mess = "You have summoned: " + ref.getName() + ".\n";
+                                            Thread summoning = new Thread(() -> {
+                                                ArrayList<String> summontemp;
+                                                if (ref.getRarity() == 4) {
+                                                    summontemp = summon.getFourStarAnimation();
+                                                } else {
+                                                    summontemp = summon.getFiveStarAnimation();
+                                                }
+                                                Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
+                                                for (int a1 = 1; a1 < summontemp.size(); a1++) {
+                                                    try {
+                                                        Thread.sleep(1000);
+                                                    } catch (InterruptedException ignored) {
+                                                    }
+                                                    final int asdf = a1;
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(summontemp.get(asdf))).block();
+                                                }
+                                                try {
+                                                    Thread.sleep(3000);
+                                                } catch (InterruptedException ignored) {
+                                                }
+                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(mess)).block();
+                                                try {
+                                                    Thread.sleep(1000);
+                                                } catch (InterruptedException ignored) {
+                                                }
+                                                String blah = summontemp.get(summontemp.size() - 1);
+                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```")).block();
+                                                String anotherone = blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```";
+                                                if (store.getUser(senderID).hasCharacter(ref.getID())) {
+                                                    int quint;
+                                                    if (ref.getRarity() == 3) {
+                                                        quint = 1;
+                                                    } else if (ref.getRarity() == 4) {
+                                                        quint = 3;
+                                                    } else {
+                                                        quint = 5;
+                                                    }
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(anotherone + "\n" + "Since you already possess " + ref.getName() + ", you have been given " + quint + " Quintessence Fragment(s).")).block();
+                                                    store.getUser(senderID).addGuaranteedCurrency(quint);
+                                                } else {
+                                                    store.getUser(senderID).addCharacter(tempchar);
+                                                }
+                                                event.getMessage().getChannel().block().createEmbed(embedCreateSpec -> {
+                                                    embedCreateSpec.setImage(ref.getImageLink());
+                                                }).block();
+                                                store.saveData();
+                                            });
+                                            summoning.start();
+                                        } else {
+                                            event.getMessage().getChannel().block().createMessage("Insufficient Recall Shards! You have: " + store.getUser(senderID).getSummoningCurrency() + " Recall Shards. Required: 100 Recall Shards").block();
+                                        }
+                                    } else {
+                                        event.getMessage().getChannel().block().createMessage("Slow down! Please wait " + store.getUser(senderID).timetonextCommand() + " seconds before rolling again.").block();
+                                    }
+                                } else {
+                                    event.getMessage().getChannel().block().createMessage("This banner is not active.").block();
                                 }
                             } else {
                                 event.getMessage().getChannel().block().createMessage("Banner ID does not exist.").block();
@@ -421,51 +757,139 @@ public class GenRPGacha {
                         if (IDregexconfirm(m[1])) {
                             int id = Integer.parseInt(m[1]);
                             if (store.hasBannerID(id)) {
-                                if (store.getBannerbyID(id).getFocus().size() > 0) {
-                                    if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
-                                        store.getUser(senderID).madecommand();
-                                        if (store.getUser(senderID).getSummoningCurrency() >= 100) {
-                                            store.getUser(senderID).addSummoningCurrency(-100);
-                                            Integer tempchar = store.getBannerbyID(id).guaranteepull();
-                                            Character ref = store.getCharacterByID(tempchar);
-                                            String mess = "You have summoned: " + ref.getName() + ".\n";
-                                            Thread summoning = new Thread(() -> {
-                                                ArrayList<String> summontemp = summon.getFiveStarAnimation();
-                                                Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
-                                                for (int a1 = 1; a1 < summontemp.size(); a1++) {
+                                if (store.getBannerbyID(id).isEnabled()) {
+                                    if (store.getBannerbyID(id).getFocus().size() > 0) {
+                                        if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
+                                            store.getUser(senderID).madecommand();
+                                            if (store.getUser(senderID).getGuaranteedCurrency() >= 100) {
+                                                store.getUser(senderID).addGuaranteedCurrency(-100);
+                                                Integer tempchar = store.getBannerbyID(id).guaranteepull();
+                                                Character ref = store.getCharacterByID(tempchar);
+                                                String mess = "You have summoned: " + ref.getName() + ".\n";
+                                                Thread summoning = new Thread(() -> {
+                                                    ArrayList<String> summontemp = summon.getFiveStarAnimation();
+                                                    Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
+                                                    for (int a1 = 1; a1 < summontemp.size(); a1++) {
+                                                        try {
+                                                            Thread.sleep(1000);
+                                                        } catch (InterruptedException ignored) {
+                                                        }
+                                                        final int asdf = a1;
+                                                        messagetest.edit(messageEditSpec -> messageEditSpec.setContent(summontemp.get(asdf))).block();
+                                                    }
+                                                    try {
+                                                        Thread.sleep(3000);
+                                                    } catch (InterruptedException ignored) {
+                                                    }
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(mess)).block();
                                                     try {
                                                         Thread.sleep(1000);
                                                     } catch (InterruptedException ignored) {
                                                     }
-                                                    final int asdf = a1;
-                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(summontemp.get(asdf))).block();
-                                                }
-                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(mess)).block();
-                                                try {
-                                                    Thread.sleep(3000);
-                                                } catch (InterruptedException ignored) {
-                                                }
-                                                String blah = summontemp.get(summontemp.size() - 1);
-                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```")).block();
-                                                String anotherone = blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```";
-                                                if (store.getUser(senderID).hasCharacter(ref.getID())) {
-                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(anotherone + "\n" + "Since you already possess " + ref.getName() + ", you have been given 10 Quintessence Fragments.")).block();
-                                                    store.getUser(senderID).addGuaranteedCurrency(10);
-                                                } else {
-                                                    store.getUser(senderID).addCharacter(tempchar);
-                                                }
-                                                event.getMessage().getChannel().block().createEmbed(embedCreateSpec -> embedCreateSpec.setImage(ref.getImageLink())).block();
-                                                store.saveData();
-                                            });
-                                            summoning.start();
+                                                    String blah = summontemp.get(summontemp.size() - 1);
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```")).block();
+                                                    String anotherone = blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```";
+                                                    if (store.getUser(senderID).hasCharacter(ref.getID())) {
+                                                        messagetest.edit(messageEditSpec -> messageEditSpec.setContent(anotherone + "\n" + "Since you already possess " + ref.getName() + ", you have been given 10 Quintessence Fragment(s).")).block();
+                                                        store.getUser(senderID).addGuaranteedCurrency(10);
+                                                    } else {
+                                                        store.getUser(senderID).addCharacter(tempchar);
+                                                    }
+                                                    event.getMessage().getChannel().block().createEmbed(embedCreateSpec -> embedCreateSpec.setImage(ref.getImageLink())).block();
+                                                    store.saveData();
+                                                });
+                                                summoning.start();
+                                            } else {
+                                                event.getMessage().getChannel().block().createMessage("Insufficient Quintessence Fragments! You have: " + store.getUser(senderID).getGuaranteedCurrency() + " Quintessence Fragments. Required: 100 Quintessence Fragments.").block();
+                                            }
                                         } else {
-                                            event.getMessage().getChannel().block().createMessage("Insufficient Quintessence Fragments! You have: " + store.getUser(senderID).getGuaranteedCurrency() + " Quintessence Fragments. Required: 100 Recall Shards").block();
+                                            event.getMessage().getChannel().block().createMessage("Slow down! Please wait " + store.getUser(senderID).timetonextCommand() + " seconds before rolling again.").block();
                                         }
                                     } else {
-                                        event.getMessage().getChannel().block().createMessage("Slow down! Please wait " + store.getUser(senderID).timetonextCommand() + " seconds before rolling again.").block();
+                                        event.getMessage().getChannel().block().createMessage("This banner does not have any focus units.").block();
                                     }
                                 } else {
-                                    event.getMessage().getChannel().block().createMessage("This banner does not have any focus units.").block();
+                                    event.getMessage().getChannel().block().createMessage("This banner is not active.").block();
+                                }
+                            } else {
+                                event.getMessage().getChannel().block().createMessage("Banner ID not found.").block();
+                            }
+                        } else {
+                            event.getMessage().getChannel().block().createMessage("Invalid ID inputted, ensure it is a number.").block();
+                        }
+                    }
+                }
+            }
+        });
+
+        commands.put("gr", event -> {
+            store.madeCommand();
+            final Member member = event.getMember().orElse(null);
+            if (member != null) {
+                String senderID = member.getId().asString();
+                String[] m = parseCommand(event.getMessage().getContent().toString());
+                if (m.length != 2) {
+                    event.getMessage().getChannel().block().createMessage("Invalid argument amount. Usage: %gr (ID)").block();
+                } else {
+                    if (!store.hasUser(member.getId().asString())) {
+                        event.getMessage().getChannel().block().createMessage("Please register an account with the %register command, <@" + senderID + ">").block();
+                    } else {
+                        if (IDregexconfirm(m[1])) {
+                            int id = Integer.parseInt(m[1]);
+                            if (store.hasBannerID(id)) {
+                                if (store.getBannerbyID(id).isEnabled()) {
+                                    if (store.getBannerbyID(id).getFocus().size() > 0) {
+                                        if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
+                                            store.getUser(senderID).madecommand();
+                                            if (store.getUser(senderID).getGuaranteedCurrency() >= 100) {
+                                                store.getUser(senderID).addGuaranteedCurrency(-100);
+                                                Integer tempchar = store.getBannerbyID(id).guaranteepull();
+                                                Character ref = store.getCharacterByID(tempchar);
+                                                String mess = "You have summoned: " + ref.getName() + ".\n";
+                                                Thread summoning = new Thread(() -> {
+                                                    ArrayList<String> summontemp = summon.getFiveStarAnimation();
+                                                    Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
+                                                    for (int a1 = 1; a1 < summontemp.size(); a1++) {
+                                                        try {
+                                                            Thread.sleep(1000);
+                                                        } catch (InterruptedException ignored) {
+                                                        }
+                                                        final int asdf = a1;
+                                                        messagetest.edit(messageEditSpec -> messageEditSpec.setContent(summontemp.get(asdf))).block();
+                                                    }
+                                                    try {
+                                                        Thread.sleep(3000);
+                                                    } catch (InterruptedException ignored) {
+                                                    }
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(mess)).block();
+                                                    try {
+                                                        Thread.sleep(1000);
+                                                    } catch (InterruptedException ignored) {
+                                                    }
+                                                    String blah = summontemp.get(summontemp.size() - 1);
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```")).block();
+                                                    String anotherone = blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```";
+                                                    if (store.getUser(senderID).hasCharacter(ref.getID())) {
+                                                        messagetest.edit(messageEditSpec -> messageEditSpec.setContent(anotherone + "\n" + "Since you already possess " + ref.getName() + ", you have been given 10 Quintessence Fragment(s).")).block();
+                                                        store.getUser(senderID).addGuaranteedCurrency(10);
+                                                    } else {
+                                                        store.getUser(senderID).addCharacter(tempchar);
+                                                    }
+                                                    event.getMessage().getChannel().block().createEmbed(embedCreateSpec -> embedCreateSpec.setImage(ref.getImageLink())).block();
+                                                    store.saveData();
+                                                });
+                                                summoning.start();
+                                            } else {
+                                                event.getMessage().getChannel().block().createMessage("Insufficient Quintessence Fragments! You have: " + store.getUser(senderID).getGuaranteedCurrency() + " Quintessence Fragments. Required: 100 Quintessence Fragments.").block();
+                                            }
+                                        } else {
+                                            event.getMessage().getChannel().block().createMessage("Slow down! Please wait " + store.getUser(senderID).timetonextCommand() + " seconds before rolling again.").block();
+                                        }
+                                    } else {
+                                        event.getMessage().getChannel().block().createMessage("This banner does not have any focus units.").block();
+                                    }
+                                } else {
+                                    event.getMessage().getChannel().block().createMessage("This banner is not active.").block();
                                 }
                             } else {
                                 event.getMessage().getChannel().block().createMessage("Banner ID not found.").block();
@@ -1057,6 +1481,33 @@ public class GenRPGacha {
                             store.addBanner(new Banner(m[1], store.getnextBannerID()));
                             store.saveData();
                             event.getMessage().getChannel().block().createMessage("New banner named " + m[1] + " with ID " + store.getBanner(m[1]).getID() + " created!").block();
+                        }
+                    }
+                }
+            }
+        });
+
+        commands.put("dupebanner", event -> {
+            store.madeCommand();
+            final Member member = event.getMember().orElse(null);
+            if (member != null) {
+                String[] m = parseCommand(event.getMessage().getContent().toString());
+                String senderID = member.getId().asString();
+                if (senderID.equals("136668026404732928")) {
+                    if (m.length != 3) {
+                        event.getMessage().getChannel().block().createMessage("Invalid argument amount. Usage: %dupebanner ID \"name\"").block();
+                    } else {
+                        if (IDregexconfirm(m[1])) {
+                            Integer tempid = Integer.parseInt(m[1]);
+                            if (!store.hasBannerID(tempid)) {
+                                event.getMessage().getChannel().block().createMessage("Banner does not exist.").block();
+                            } else {
+                                store.addBanner(store.getBannerbyID(tempid).dupe(store, m[2]));
+                                store.saveData();
+                                event.getMessage().getChannel().block().createMessage("New banner named " + m[2] + " with ID " + store.getBanner(m[2]).getID() + " created!").block();
+                            }
+                        } else {
+                            event.getMessage().getChannel().block().createMessage("Invalid ID inputted, ensure it is a number.").block();
                         }
                     }
                 }
