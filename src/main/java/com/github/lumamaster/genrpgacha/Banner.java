@@ -12,11 +12,14 @@ public class Banner implements Serializable {
     private ArrayList<Integer> fourstar = new ArrayList<>(1);
     private ArrayList<Integer> fivestar = new ArrayList<>(1);
     private ArrayList<Integer> focus = new ArrayList<>(1);
+    private ArrayList<Integer> sixstar = new ArrayList<>(1);
     private int threerate = 52;
     private int fourrate = 40;
     private int fiverate = 3;
     private int focusrate = 5;
+    private double megararerate = 0.01;
     private boolean enable;
+    private boolean six = false;
     Banner()
     {
     }
@@ -30,6 +33,10 @@ public class Banner implements Serializable {
     public String getName() {
         return name;
     }
+
+    public void setsix(boolean b) {six = b;}
+
+    public boolean issix() {return six;}
 
     void changeName(String a) {name = a;}
 
@@ -204,8 +211,28 @@ public class Banner implements Serializable {
         return false;
     }
 
+    boolean addtosix(Character c) {
+        try {
+            sixstar.add(c.getID());
+            sixstar.sort((o1, o2) -> {
+                if (o1 > o2) {
+                    return 1;
+                }
+                else if (o1.equals(o2)) {
+                    return 0;
+                }
+                else {
+                    return -1;
+                }
+            });
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     int[] getRates() {
-        int[] rates = new int[4];
+        int[] rates = new int[5];
         rates[0] = threerate;
         rates[1] = fourrate;
         rates[2] = fiverate;
@@ -237,18 +264,33 @@ public class Banner implements Serializable {
 
     ArrayList<Integer> getFocus() { return focus; }
 
+    ArrayList<Integer> getSixStar() { return sixstar; }
+
     void enable(boolean b) { enable = b; }
 
     boolean isEnabled() { return enable; }
 
     Integer singlepull() {
-        int starcount = (int)(Math.random() * 100);
+        //System.out.println(focusrate + fiverate + fourrate + threerate - megararerate);
+        double starcount = (Math.random() * 100);
+        if (starcount > 99.99)
+        {
+            System.out.println("Close");
+        }
         int choice;
         if (starcount > threerate) {
             if (starcount > fourrate + threerate) {
-                if (starcount > fiverate + fourrate + threerate) {
-                    choice = (int)(Math.random() * focus.size());
-                    return focus.get(choice);
+                if (starcount > fiverate + fourrate + threerate - megararerate) {
+                    if (starcount > focusrate + fiverate + fourrate + threerate - megararerate) {
+                        System.out.println("Six star get!");
+                        return sixstar.get(0);
+                    } else if (focus.size() > 0) {
+                        choice = (int) (Math.random() * focus.size());
+                        return focus.get(choice);
+                    } else {
+                        choice = (int)(Math.random() * fivestar.size());
+                        return fivestar.get(choice);
+                    }
                 } else {
                     choice = (int)(Math.random() * fivestar.size());
                     return fivestar.get(choice);
@@ -264,17 +306,25 @@ public class Banner implements Serializable {
     }
 
     ArrayList<Integer> tenpull() {
-        int starcount;
+        double starcount;
         int choice;
         ArrayList<Integer> result = new ArrayList<>();
         int i;
         for (i = 0; i < 10; i++) {
-            starcount = (int)(Math.random() * 100);
+            starcount = (Math.random() * 100);
             if (starcount > threerate) {
                 if (starcount > fourrate + threerate) {
-                    if (starcount > fiverate + fourrate + threerate) {
-                        choice = (int) (Math.random() * focus.size());
-                        result.add(focus.get(choice));
+                    if (starcount > fiverate + fourrate + threerate - megararerate) {
+                        if (starcount > focusrate + fiverate + fourrate + threerate - megararerate) {
+                            System.out.println("Six star get!");
+                            result.add(sixstar.get(0));
+                        } else if (focus.size() > 0) {
+                            choice = (int) (Math.random() * focus.size());
+                            result.add(focus.get(choice));
+                        } else {
+                            choice = (int) (Math.random() * fivestar.size());
+                            result.add(fivestar.get(choice));
+                        }
                     } else {
                         choice = (int) (Math.random() * fivestar.size());
                         result.add(fivestar.get(choice));
@@ -292,12 +342,17 @@ public class Banner implements Serializable {
     }
 
     Integer rarepull() {
-        int starcount = (int) (Math.random() * (fourrate + fiverate + focusrate));
+        double starcount = (Math.random() * (fourrate + fiverate + focusrate));
         int choice;
         if (starcount > fourrate) {
-            if (starcount > fiverate + fourrate) {
-                choice = (int) (Math.random() * focus.size());
-                return focus.get(choice);
+            if (starcount > fiverate + fourrate - megararerate) {
+                if (starcount > focusrate + fiverate + fourrate - megararerate) {
+                    System.out.println("Six star get!");
+                    return sixstar.get(0);
+                } else {
+                    choice = (int) (Math.random() * focus.size());
+                    return focus.get(choice);
+                }
             } else {
                 choice = (int) (Math.random() * fivestar.size());
                 return fivestar.get(choice);
@@ -309,6 +364,19 @@ public class Banner implements Serializable {
     }
 
     Integer guaranteepull() {
+        if (six)
+        {
+            int megarare = (int)(Math.random() * 100);
+            if (megarare < 1)
+            {
+                System.out.println("Six star get!");
+                return sixstar.get(0);
+            }
+            else
+            {
+                return fivestar.get((int)(Math.random() * fivestar.size()));
+            }
+        }
         int choice = (int) (Math.random() * focus.size());
         return focus.get(choice);
     }

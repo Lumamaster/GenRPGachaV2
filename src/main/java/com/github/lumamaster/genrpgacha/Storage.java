@@ -61,6 +61,28 @@ class Storage {
         charlist.add(c);
         characterid = charlist.size() + 1;
     }
+
+    void addCharactertoAllBanners(Character c, int rate)
+    {
+        for (Banner banner : bannerlist) {
+            switch (rate) {
+                case 3:
+                    banner.addtothreestar(c);
+                    break;
+                case 4:
+                    banner.addtofourstar(c);
+                    break;
+                case 5:
+                    banner.addtofivestar(c);
+                    break;
+                case 6:
+                    banner.addtofocus(c);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
     void addUser(User c) {
         userlist.add(c);
     }

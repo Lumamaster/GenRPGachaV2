@@ -8,6 +8,7 @@ class SummoningAnimations {
     private ArrayList<String> fivestar = new ArrayList<>();
     private ArrayList<String> fivefakeout = new ArrayList<>();
     private ArrayList<String> fivecucked = new ArrayList<>();
+    private ArrayList<String> six = new ArrayList<>();
     SummoningAnimations() {
         threestar.add("```<*>```");
         threestar.add("```<**>```");
@@ -41,6 +42,18 @@ class SummoningAnimations {
         fivecucked.add("```<*****>```");
         fivecucked.add("```<****>```");
 
+        six.add("```<*>```");
+        six.add("```<**>```");
+        six.add("```<***>```");
+        six.add("```<****>```");
+        six.add("```<****>```");
+        six.add("```<****>```");
+        six.add("```<*****>```");
+        six.add("```<*****>```");
+        six.add("```<*****>```");
+        six.add("```<*****>```");
+        six.add("```<******> (:O)```");
+        six.add("```<******> (:O)```");
     }
     ArrayList<String> getThreeStarAnimation() {
         return threestar;
@@ -58,5 +71,8 @@ class SummoningAnimations {
         } else {
             return fivestar;
         }
+    }
+    ArrayList<String> getSixStarAnimation() {
+        return six;
     }
 }

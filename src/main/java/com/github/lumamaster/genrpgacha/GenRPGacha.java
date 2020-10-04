@@ -2,6 +2,7 @@ package com.github.lumamaster.genrpgacha;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
@@ -22,8 +23,8 @@ public class GenRPGacha {
     private static final Map<String, Command> commands = new HashMap<>();
 
     public static String[] parseCommand(String command) {
-        String truncated = command.substring(10, command.length() - 1);
-        String[] m = truncated.split("\\\"?( |$)(?=(([^\\\"]*\\\"){2})*[^\\\"]*$)\\\"?");
+        //String truncated = command.substring(10, command.length() - 1);
+        String[] m = command.split(" (?=(([^'\"]*['\"]){2})*[^'\"]*$)");
         for (int a = 0; a < m.length; a++) {
             System.out.print(m[a] + " | ");
         }
@@ -187,8 +188,10 @@ public class GenRPGacha {
                                                     summontemp = summon.getThreeStarAnimation();
                                                 } else if (ref.getRarity() == 4) {
                                                     summontemp = summon.getFourStarAnimation();
-                                                } else {
+                                                } else if (ref.getRarity() == 5) {
                                                     summontemp = summon.getFiveStarAnimation();
+                                                } else {
+                                                    summontemp = summon.getSixStarAnimation();
                                                 }
                                                 Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
                                                 for (int a1 = 1; a1 < summontemp.size(); a1++) {
@@ -281,8 +284,10 @@ public class GenRPGacha {
                                                     summontemp = summon.getThreeStarAnimation();
                                                 } else if (ref.getRarity() == 4) {
                                                     summontemp = summon.getFourStarAnimation();
-                                                } else {
+                                                } else if (ref.getRarity() == 5) {
                                                     summontemp = summon.getFiveStarAnimation();
+                                                } else {
+                                                    summontemp = summon.getSixStarAnimation();
                                                 }
                                                 Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
                                                 for (int a1 = 1; a1 < summontemp.size(); a1++) {
@@ -405,8 +410,10 @@ public class GenRPGacha {
                                                     summontemp = summon.getThreeStarAnimation();
                                                 } else if (highestrarity == 4) {
                                                     summontemp = summon.getFourStarAnimation();
-                                                } else {
+                                                } else if (highestrarity == 5) {
                                                     summontemp = summon.getFiveStarAnimation();
+                                                } else {
+                                                    summontemp = summon.getSixStarAnimation();
                                                 }
                                                 Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
                                                 for (int a1 = 1; a1 < summontemp.size(); a1++) {
@@ -512,8 +519,10 @@ public class GenRPGacha {
                                                     summontemp = summon.getThreeStarAnimation();
                                                 } else if (highestrarity == 4) {
                                                     summontemp = summon.getFourStarAnimation();
-                                                } else {
+                                                } else if (highestrarity == 5) {
                                                     summontemp = summon.getFiveStarAnimation();
+                                                } else {
+                                                    summontemp = summon.getSixStarAnimation();
                                                 }
                                                 Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
                                                 for (int a1 = 1; a1 < summontemp.size(); a1++) {
@@ -587,8 +596,10 @@ public class GenRPGacha {
                                                 ArrayList<String> summontemp;
                                                 if (ref.getRarity() == 4) {
                                                     summontemp = summon.getFourStarAnimation();
-                                                } else {
+                                                } else if (ref.getRarity() == 5) {
                                                     summontemp = summon.getFiveStarAnimation();
+                                                } else {
+                                                    summontemp = summon.getSixStarAnimation();
                                                 }
                                                 Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
                                                 for (int a1 = 1; a1 < summontemp.size(); a1++) {
@@ -678,8 +689,10 @@ public class GenRPGacha {
                                                 ArrayList<String> summontemp;
                                                 if (ref.getRarity() == 4) {
                                                     summontemp = summon.getFourStarAnimation();
-                                                } else {
+                                                } else if (ref.getRarity() == 5) {
                                                     summontemp = summon.getFiveStarAnimation();
+                                                } else {
+                                                    summontemp = summon.getSixStarAnimation();
                                                 }
                                                 Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
                                                 for (int a1 = 1; a1 < summontemp.size(); a1++) {
@@ -758,7 +771,7 @@ public class GenRPGacha {
                             int id = Integer.parseInt(m[1]);
                             if (store.hasBannerID(id)) {
                                 if (store.getBannerbyID(id).isEnabled()) {
-                                    if (store.getBannerbyID(id).getFocus().size() > 0) {
+                                    if (store.getBannerbyID(id).getFocus().size() > 0 || store.getBannerbyID(id).issix()) {
                                         if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
                                             store.getUser(senderID).madecommand();
                                             if (store.getUser(senderID).getGuaranteedCurrency() >= 100) {
@@ -767,7 +780,12 @@ public class GenRPGacha {
                                                 Character ref = store.getCharacterByID(tempchar);
                                                 String mess = "You have summoned: " + ref.getName() + ".\n";
                                                 Thread summoning = new Thread(() -> {
-                                                    ArrayList<String> summontemp = summon.getFiveStarAnimation();
+                                                    ArrayList<String> summontemp;
+                                                    if (ref.getRarity() == 6) {
+                                                        summontemp = summon.getSixStarAnimation();
+                                                    } else {
+                                                        summontemp = summon.getFiveStarAnimation();
+                                                    }
                                                     Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
                                                     for (int a1 = 1; a1 < summontemp.size(); a1++) {
                                                         try {
@@ -847,7 +865,12 @@ public class GenRPGacha {
                                                 Character ref = store.getCharacterByID(tempchar);
                                                 String mess = "You have summoned: " + ref.getName() + ".\n";
                                                 Thread summoning = new Thread(() -> {
-                                                    ArrayList<String> summontemp = summon.getFiveStarAnimation();
+                                                    ArrayList<String> summontemp;
+                                                    if (ref.getRarity() == 6) {
+                                                        summontemp = summon.getSixStarAnimation();
+                                                    } else {
+                                                        summontemp = summon.getFiveStarAnimation();
+                                                    }
                                                     Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
                                                     for (int a1 = 1; a1 < summontemp.size(); a1++) {
                                                         try {
@@ -893,6 +916,99 @@ public class GenRPGacha {
                                 }
                             } else {
                                 event.getMessage().getChannel().block().createMessage("Banner ID not found.").block();
+                            }
+                        } else {
+                            event.getMessage().getChannel().block().createMessage("Invalid ID inputted, ensure it is a number.").block();
+                        }
+                    }
+                }
+            }
+        });
+
+        commands.put("secretroll", event -> {
+            store.madeCommand();
+            final Member member = event.getMember().orElse(null);
+            if (member != null) {
+                String senderID = member.getId().asString();
+                String[] m = parseCommand(event.getMessage().getContent().toString());
+                if (m.length != 2) {
+                    event.getMessage().getChannel().block().createMessage("Invalid argument amount. Usage: %secretroll (ID)").block();
+                } else {
+                    if (!store.hasUser(member.getId().asString())) {
+                        event.getMessage().getChannel().block().createMessage("Please register an account with the %register command, <@" + senderID + ">").block();
+                    } else {
+                        if (IDregexconfirm(m[1])) {
+                            int id = Integer.parseInt(m[1]);
+                            if (store.hasBannerID(id)) {
+                                if (store.getBannerbyID(id).isEnabled()) {
+                                    if (store.getUser(senderID).canMakeCommand() || senderID.equals("136668026404732928")) {
+                                        store.getUser(senderID).madecommand();
+                                        if (store.getUser(senderID).getSummoningCurrency() >= 100) {
+                                            store.getUser(senderID).addSummoningCurrency(-100);
+                                            Integer tempchar = store.getBannerbyID(id).getSixStar().get(0);
+                                            Character ref = store.getCharacterByID(tempchar);
+                                            String mess = "You have summoned: " + ref.getName() + ".\n";
+                                            Thread summoning = new Thread(() -> {
+                                                ArrayList<String> summontemp;
+                                                if (ref.getRarity() == 4) {
+                                                    summontemp = summon.getFourStarAnimation();
+                                                } else if (ref.getRarity() == 5) {
+                                                    summontemp = summon.getFiveStarAnimation();
+                                                } else {
+                                                    summontemp = summon.getSixStarAnimation();
+                                                }
+                                                Message messagetest = event.getMessage().getChannel().block().createMessage(summontemp.get(0)).block();
+                                                for (int a1 = 1; a1 < summontemp.size(); a1++) {
+                                                    try {
+                                                        Thread.sleep(1000);
+                                                    } catch (InterruptedException ignored) {
+                                                    }
+                                                    final int asdf = a1;
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(summontemp.get(asdf))).block();
+                                                }
+                                                try {
+                                                    Thread.sleep(3000);
+                                                } catch (InterruptedException ignored) {
+                                                }
+                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(mess)).block();
+                                                try {
+                                                    Thread.sleep(1000);
+                                                } catch (InterruptedException ignored) {
+                                                }
+                                                String blah = summontemp.get(summontemp.size() - 1);
+                                                messagetest.edit(messageEditSpec -> messageEditSpec.setContent(blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```")).block();
+                                                String anotherone = blah + "\n" + mess + "\n```" + ref.getSummonquote() + "```";
+                                                if (store.getUser(senderID).hasCharacter(ref.getID())) {
+                                                    int quint;
+                                                    if (ref.getRarity() == 3) {
+                                                        quint = 1;
+                                                    } else if (ref.getRarity() == 4) {
+                                                        quint = 3;
+                                                    } else {
+                                                        quint = 5;
+                                                    }
+                                                    messagetest.edit(messageEditSpec -> messageEditSpec.setContent(anotherone + "\n" + "Since you already possess " + ref.getName() + ", you have been given " + quint + " Quintessence Fragment(s).")).block();
+                                                    store.getUser(senderID).addGuaranteedCurrency(quint);
+                                                } else {
+                                                    store.getUser(senderID).addCharacter(tempchar);
+                                                }
+                                                event.getMessage().getChannel().block().createEmbed(embedCreateSpec -> {
+                                                    embedCreateSpec.setImage(ref.getImageLink());
+                                                }).block();
+                                                store.saveData();
+                                            });
+                                            summoning.start();
+                                        } else {
+                                            event.getMessage().getChannel().block().createMessage("Insufficient Recall Shards! You have: " + store.getUser(senderID).getSummoningCurrency() + " Recall Shards. Required: 100 Recall Shards").block();
+                                        }
+                                    } else {
+                                        event.getMessage().getChannel().block().createMessage("Slow down! Please wait " + store.getUser(senderID).timetonextCommand() + " seconds before rolling again.").block();
+                                    }
+                                } else {
+                                    event.getMessage().getChannel().block().createMessage("This banner is not active.").block();
+                                }
+                            } else {
+                                event.getMessage().getChannel().block().createMessage("Banner ID does not exist.").block();
                             }
                         } else {
                             event.getMessage().getChannel().block().createMessage("Invalid ID inputted, ensure it is a number.").block();
@@ -1037,17 +1153,31 @@ public class GenRPGacha {
                         if (IDregexconfirm(m[1])) {
                             int id = Integer.parseInt(m[1]);
                             Character temp = store.getCharacterByID(id);
-                            StringBuilder infomessage = new StringBuilder("**Name: ** ");
-                            infomessage.append(temp.getName());
-                            infomessage.append("\n**Description: ** ");
-                            infomessage.append(temp.getDescription());
-                            infomessage.append("\n**Summoning Quote: ** ");
-                            infomessage.append(temp.getSummonquote());
-                            infomessage.append("\n**Faceclaim/Character Art:** ");
-                            event.getMessage().getChannel().block().createMessage(infomessage.toString()).block();
-                            event.getMessage().getChannel().block().createEmbed(embedCreateSpec -> {
-                                embedCreateSpec.setImage(temp.getImageLink());
-                            }).block();
+                            if (temp.getRarity() == 6 && !store.getUser(senderID).hasCharacter(temp.getID()))
+                            {
+                                StringBuilder infomessage = new StringBuilder("**Name: ** ");
+                                infomessage.append("[ERROR]");
+                                infomessage.append("\n**Description: ** ");
+                                infomessage.append("[ERROR]");
+                                infomessage.append("\n**Summoning Quote: ** ");
+                                infomessage.append("[ERROR]");
+                                infomessage.append("\n**Faceclaim/Character Art:** ");
+                                infomessage.append("[ERROR]");
+                                event.getMessage().getChannel().block().createMessage(infomessage.toString()).block();
+                            }
+                            else {
+                                StringBuilder infomessage = new StringBuilder("**Name: ** ");
+                                infomessage.append(temp.getName());
+                                infomessage.append("\n**Description: ** ");
+                                infomessage.append(temp.getDescription());
+                                infomessage.append("\n**Summoning Quote: ** ");
+                                infomessage.append(temp.getSummonquote());
+                                infomessage.append("\n**Faceclaim/Character Art:** ");
+                                event.getMessage().getChannel().block().createMessage(infomessage.toString()).block();
+                                event.getMessage().getChannel().block().createEmbed(embedCreateSpec -> {
+                                    embedCreateSpec.setImage(temp.getImageLink());
+                                }).block();
+                            }
                         } else {
                             event.getMessage().getChannel().block().createMessage("Invalid ID inputted, ensure it is a number.").block();
                         }
@@ -1149,6 +1279,75 @@ public class GenRPGacha {
                             }
                         }
                         event.getMessage().getChannel().block().createMessage(temp.toString()).block();
+                    }
+                }
+            }
+        });
+
+        commands.put("testRNG", event -> {
+            store.madeCommand();
+            final Member member = event.getMember().orElse(null);
+            if (member != null) {
+                String[] m = parseCommand(event.getMessage().getContent().toString());
+                String senderID = member.getId().asString();
+                if (senderID.equals("136668026404732928")) {
+                    if (m.length != 2) {
+                        event.getMessage().getChannel().block().createMessage("Invalid argument amount. Usage: %testRNG ID").block();
+                    } else {
+                        int bannerid = Integer.parseInt(m[1]);
+                        if (store.hasBannerID(bannerid)) {
+                            Banner temp = store.getBannerbyID(bannerid);
+                            int single = 0;
+                            int ten = 0;
+                            int rare = 0;
+                            int guaranteed = 0;
+                            int tempint;
+                            ArrayList<Integer> temparr = new ArrayList<>();
+                            System.out.println("Testing single");
+                            tempint = temp.singlepull();
+                            while (store.getCharacterByID(tempint).getRarity() != 6)
+                            {
+                                single++;
+                                tempint = temp.singlepull();
+                            }
+                            System.out.println("Testing ten");
+                            boolean found = false;
+                            while (!found)
+                            {
+                                temparr = temp.tenpull();
+                                for (int i = 0; i < temparr.size(); i++)
+                                {
+                                    if (store.getCharacterByID(temparr.get(i)).getRarity() != 6)
+                                    {
+                                        ten++;
+                                    }
+                                    else
+                                    {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            System.out.println("Testing rare");
+                            tempint = temp.rarepull();
+                            while (store.getCharacterByID(tempint).getRarity() != 6)
+                            {
+                                rare++;
+                                tempint = temp.rarepull();
+                            }
+                            System.out.println("Testing guarantee");
+                            tempint = temp.guaranteepull();
+                            while (store.getCharacterByID(tempint).getRarity() != 6)
+                            {
+                                guaranteed++;
+                                tempint = temp.guaranteepull();
+                            }
+
+                            event.getMessage().getChannel().block().createMessage("Single pull tries: " + single + "\nTen pull tries: " + ten + "\nRare pull tries: " + rare + "\nGuaranteed pull tries: " + guaranteed).block();
+
+                            } else {
+                            event.getMessage().getChannel().block().createMessage("Banner does not exist.").block();
+                        }
                     }
                 }
             }
@@ -1343,8 +1542,8 @@ public class GenRPGacha {
                             if (IDregexconfirm(m[1])) {
                                 int id = Integer.parseInt(m[1]);
                                 if (store.hasCharacterID(id)) {
-                                    if (level < 3 || level > 5) {
-                                        event.getMessage().getChannel().block().createMessage("Invalid rarity. Ensure it is between 3 and 5.").block();
+                                    if (level < 3 || level > 6) {
+                                        event.getMessage().getChannel().block().createMessage("Invalid rarity. Ensure it is between 3 and 6.").block();
                                     } else {
                                         store.getCharacterByID(id).setRarity(level);
                                         store.saveData();
@@ -1553,6 +1752,45 @@ public class GenRPGacha {
             }
         });
 
+        commands.put("setbannersix", event -> {
+            store.madeCommand();
+            final Member member = event.getMember().orElse(null);
+            if (member != null) {
+                String[] m = parseCommand(event.getMessage().getContent().toString());
+                String senderID = member.getId().asString();
+                if (senderID.equals("136668026404732928")) {
+                    if (m.length != 3) {
+                        event.getMessage().getChannel().block().createMessage("Invalid argument amount. Usage: %setbannersix id, true/false").block();
+                    } else {
+                        int bannerid = Integer.parseInt(m[1]);
+                        if (store.hasBannerID(bannerid)) {
+                            boolean tf;
+                            switch (m[2]) {
+                                case "true":
+                                    tf = true;
+                                    break;
+                                case "false":
+                                    tf = false;
+                                    break;
+                                default:
+                                    event.getMessage().getChannel().block().createMessage("Please use true/false.").block();
+                                    return;
+                            }
+                            store.getBannerbyID(bannerid).setsix(tf);
+                            store.saveData();
+                            if (tf) {
+                                event.getMessage().getChannel().block().createMessage("Banner " + store.getBannerbyID(bannerid).getName() + " has six star enabled.").block();
+                            } else {
+                                event.getMessage().getChannel().block().createMessage("Banner " + store.getBannerbyID(bannerid).getName() + " has six star disabled.").block();
+                            }
+                        } else {
+                            event.getMessage().getChannel().block().createMessage("Banner does not exist.").block();
+                        }
+                    }
+                }
+            }
+        });
+
         commands.put("addunittobanner", event -> {
             store.madeCommand();
             final Member member = event.getMember().orElse(null);
@@ -1583,6 +1821,9 @@ public class GenRPGacha {
                                             case "focus":
                                                 rate = 6;
                                                 break;
+                                            case "six":
+                                                rate = 7;
+                                                break;
                                             default:
                                                 event.getMessage().getChannel().block().createMessage("Invalid banner rate. Ensure it is one of the following: \"three, four, five, focus\".").block();
                                                 return;
@@ -1604,6 +1845,10 @@ public class GenRPGacha {
                                                 store.getBannerbyID(bannerid).addtofocus(store.getCharacterByID(unitid));
                                                 event.getMessage().getChannel().block().createMessage(store.getCharacterByID(unitid).getName() + " has been added to the focus star pool of " + store.getBannerbyID(bannerid).getName() + ".").block();
                                                 break;
+                                            case 7:
+                                                store.getBannerbyID(bannerid).addtosix(store.getCharacterByID(unitid));
+                                                event.getMessage().getChannel().block().createMessage(store.getCharacterByID(unitid).getName() + " has been added to the six star pool of " + store.getBannerbyID(bannerid).getName() + ".").block();
+                                                break;
                                             default:
                                                 event.getMessage().getChannel().block().createMessage("An error occured during processing.").block();
                                                 return;
@@ -1620,6 +1865,70 @@ public class GenRPGacha {
                             }
                         } else {
                             event.getMessage().getChannel().block().createMessage("Invalid banner ID inputted, ensure it is a number.").block();
+                        }
+                    }
+                }
+            }
+        });
+
+        commands.put("addunittoallbanners", event -> {
+            store.madeCommand();
+            final Member member = event.getMember().orElse(null);
+            if (member != null) {
+                String[] m = parseCommand(event.getMessage().getContent().toString());
+                String senderID = member.getId().asString();
+                if (senderID.equals("136668026404732928")) {
+                    if (m.length != 3) {
+                        event.getMessage().getChannel().block().createMessage("Invalid argument amount. Usage: %addunittoallbanners, unitid, rate").block();
+                    } else {
+                        if (IDregexconfirm(m[1])) {
+                            int unitid = Integer.parseInt(m[1]);
+                            if (store.hasCharacterID(unitid)) {
+                                int rate;
+                                switch (m[2]) {
+                                    case "three":
+                                        rate = 3;
+                                        break;
+                                    case "four":
+                                        rate = 4;
+                                        break;
+                                    case "five":
+                                        rate = 5;
+                                        break;
+                                    case "focus":
+                                        rate = 6;
+                                        break;
+                                    default:
+                                        event.getMessage().getChannel().block().createMessage("Invalid banner rate. Ensure it is one of the following: \"three, four, five, focus\".").block();
+                                        return;
+                                }
+                                switch (rate) {
+                                    case 3:
+                                        store.addCharactertoAllBanners(store.getCharacterByID(unitid), 3);
+                                        event.getMessage().getChannel().block().createMessage(store.getCharacterByID(unitid).getName() + " has been added to the three star pool of all banners.").block();
+                                        break;
+                                    case 4:
+                                        store.addCharactertoAllBanners(store.getCharacterByID(unitid), 4);
+                                        event.getMessage().getChannel().block().createMessage(store.getCharacterByID(unitid).getName() + " has been added to the four star pool of all banners.").block();
+                                        break;
+                                    case 5:
+                                        store.addCharactertoAllBanners(store.getCharacterByID(unitid), 5);
+                                        event.getMessage().getChannel().block().createMessage(store.getCharacterByID(unitid).getName() + " has been added to the five star pool of all banners.").block();
+                                        break;
+                                    case 6:
+                                        store.addCharactertoAllBanners(store.getCharacterByID(unitid), 6);
+                                        event.getMessage().getChannel().block().createMessage(store.getCharacterByID(unitid).getName() + " has been added to the focus star pool of all banners.").block();
+                                        break;
+                                    default:
+                                        event.getMessage().getChannel().block().createMessage("An error occured during processing.").block();
+                                        return;
+                                }
+                                store.saveData();
+                            } else {
+                                event.getMessage().getChannel().block().createMessage("Character does not exist.").block();
+                            }
+                        } else {
+                            event.getMessage().getChannel().block().createMessage("Invalid character ID inputted, ensure it is a number.").block();
                         }
                     }
                 }
@@ -1808,6 +2117,10 @@ public class GenRPGacha {
                                     temp.append(store.getCharacterByID(tempchar).getName()).append("\n");
                                 }
                                 temp.append("**Summoning Rates: **\n");
+                                if (store.getBannerbyID(id).issix())
+                                {
+                                    temp.append("**SIX STAR ENABLED**\n");
+                                }
                                 temp.append("Focus: ").append(store.getBannerbyID(id).getRates()[3]).append("%\n");
                                 temp.append("Five Star: ").append(store.getBannerbyID(id).getRates()[2]).append("%\n");
                                 temp.append("Four Star: ").append(store.getBannerbyID(id).getRates()[1]).append("%\n");
@@ -1992,13 +2305,11 @@ public class GenRPGacha {
 
     public static void main(String[] args) {
         store.loadData();
-        final DiscordClient client = new DiscordClientBuilder(args[0]).build();
-        client.getEventDispatcher().on(MessageCreateEvent.class)
-                // subscribe is like block, in that it will *request* for action
-                // to be done, but instead of blocking the thread, waiting for it
-                // to finish, it will just execute the results asynchronously.
+        final DiscordClient client = DiscordClient.create(args[0]);
+        final GatewayDiscordClient gateway = client.login().block();
+        gateway.on(MessageCreateEvent.class)
                 .subscribe(event -> {
-                    final String content = event.getMessage().getContent().orElse("");
+                    final String content = event.getMessage().getContent();
                     for (final Map.Entry<String, Command> entry : commands.entrySet()) {
                         if (content.startsWith('%' + entry.getKey())) { //SET PREFIX
                             entry.getValue().execute(event);
@@ -2006,7 +2317,7 @@ public class GenRPGacha {
                         }
                     }
                 });
-        client.login().block();
+        gateway.onDisconnect().block();
 
     }
 
